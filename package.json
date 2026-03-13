@@ -1,0 +1,24 @@
+{
+  "name": "dex_db",
+  "version": "1.0.0",
+  "description": "Database designed for handle relation pair/pool address to token0 & token1 addresses",
+  "keywords": [
+    "DEX",
+    "db"
+  ],
+  "homepage": "https://github.com/calp-pro/dex_db#readme",
+  "bugs": {
+    "url": "https://github.com/calp-pro/dex_db/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calp-pro/dex_db.git"
+  },
+  "license": "MIT",
+  "author": "Vladimir Spirin (spirin.vladimir@gmail.com)",
+  "type": "commonjs",
+  "main": "dex_db.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
