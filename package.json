@@ -1,5 +1,5 @@
 {
-  "name": "dex_db",
+  "name": "@calp-pro/dex-db",
   "version": "1.0.1",
   "description": "Database designed for handle relation pair/pool address to token0 & token1 addresses",
   "keywords": [
@@ -24,5 +24,8 @@
   "devDependencies": {
     "pancakeswap-dump": "^1.0.8",
     "sushiswap-dump": "^1.0.3"
+  },
+  "publishConfig": {
+    "provenance": true
   }
 }

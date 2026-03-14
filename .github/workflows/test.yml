@@ -1,0 +1,65 @@
+name: test.yml
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+
+jobs:
+  test:
+      
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC
+      packages: write  # Required for GitHub Packages
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Update npm
+      run: npm install -g npm@latest
+
+    - name: Run tests with coverage
+      run: |
+        node --experimental-test-coverage --test \
+          --test-reporter=spec --test-reporter-destination=stdout \
+          --test-reporter=lcov --test-reporter-destination=lcov.info \
+          test/test*js
+
+    - name: Upload to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        file: lcov.info
+
+    - name: Publish to NPM
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: npm publish
+
+    - name: Setup Node.js for GitHub Packages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@calp-pro'
+
+    - name: Publish to GitHub Packages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        npm pkg set name=@calp-pro/dex-db
+        npm publish --access=public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
