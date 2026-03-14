@@ -1,6 +1,6 @@
 {
   "name": "dex_db",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Database designed for handle relation pair/pool address to token0 & token1 addresses",
   "keywords": [
     "DEX",
@@ -19,6 +19,10 @@
   "type": "commonjs",
   "main": "dex_db.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test.*"
+  },
+  "devDependencies": {
+    "pancakeswap-dump": "^1.0.8",
+    "sushiswap-dump": "^1.0.3"
   }
 }

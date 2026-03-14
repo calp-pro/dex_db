@@ -58,23 +58,15 @@ function dex_db(pairs = []) {
         p2tt[ip][0] = it0
         p2tt[ip][1] = it1
         
-        if (t2pt[it0]) {
-            var i = t2pt[it0].findIndex(pt => pt[0] == ip)
-            if (i == -1) {
-                t2pt.push([ip, it1])
-            }
-        } else {
+        if (t2pt[it0])
+            t2pt[it0].push([ip, it1])
+        else
             t2pt[it0] = [[ip, it1]]
-        }
             
-        if (t2pt[it1]) {
-            var i = t2pt[it1].findIndex(pt => pt[0] == ip)
-            if (i == -1) {
-                t2pt.push([ip, it0])
-            }
-        } else {
+        if (t2pt[it1])
+            t2pt[it1].push([ip, it0])
+        else
             t2pt[it1] = [[ip, it0]]
-        }
     }
 
     const find_pairs_with_token = token => {
@@ -88,7 +80,7 @@ function dex_db(pairs = []) {
         if (it0 == -1) return -1
         const it1 = get(token1, trie.tokens)
         if (it1 == -1) return -1
-        return t2pt[it0].filter(pt => pt[1] == it1).map(pt => pt[0])
+        return t2pt[it0].filter(pt => pt[1] == it1).map(pt => P[pt[0]])
     }
     
     pairs.forEach(index)
