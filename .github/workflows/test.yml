@@ -31,8 +31,10 @@ jobs:
     - name: Update npm
       run: npm install -g npm@latest
 
-    - name: Run tests with coverage
+    - name: Install devDependencies
       run: npm ci
+
+    - name: Run tests with coverage
       run: |
         node --experimental-test-coverage --test \
           --test-reporter=spec --test-reporter-destination=stdout \

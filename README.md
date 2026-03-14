@@ -1,4 +1,4 @@
-# <picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.jsdelivr.net/npm/uniswap-v2-loader@5.0.1/logo-dark.svg"><img alt="calp.pro icon" src="https://cdn.jsdelivr.net/npm/uniswap-v2-loader@5.0.1/logo-light.svg" height="32" align="absmiddle"></picture>&nbsp;&nbsp;DEX DB
+# <picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.jsdelivr.net/npm/uniswap-v2-loader@5.0.1/logo-dark.svg"><img alt="calp.pro icon" src="https://cdn.jsdelivr.net/npm/uniswap-v2-loader@5.0.1/logo-light.svg" height="32" align="absmiddle"></picture>&nbsp;&nbsp;DEX DB&nbsp;&nbsp;[![Coverage](https://coveralls.io/repos/github/calp-pro/dex_db/badge.svg?branch=main)](https://coveralls.io/github/calp-pro/dex_db)
 
 Database for decentralize exchangers.<br>
 Low level data base based on [Radix-tree](https://en.wikipedia.org/wiki/Radix_tree) (same way as SQL).<br>
