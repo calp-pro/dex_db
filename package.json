@@ -1,6 +1,6 @@
 {
   "name": "@calp-pro/dex-db",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Database designed for handle relation pair/pool address to token0 & token1 addresses",
   "keywords": [
     "DEX",
@@ -18,6 +18,16 @@
   "author": "Vladimir Spirin (spirin.vladimir@gmail.com)",
   "type": "commonjs",
   "main": "dex_db.js",
+  "module": "src/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./dex_db.js",
+      "import": "./index.mjs",
+      "default": "./dex_db.js"
+    }
+  },
+  "types": "index.d.ts",
   "scripts": {
     "test": "node --test test.*"
   },
