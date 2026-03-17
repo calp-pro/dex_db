@@ -1,25 +1,24 @@
 # <picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.jsdelivr.net/npm/uniswap-v2-loader@5.0.1/logo-dark.svg"><img alt="calp.pro icon" src="https://cdn.jsdelivr.net/npm/uniswap-v2-loader@5.0.1/logo-light.svg" height="32" align="absmiddle"></picture>&nbsp;&nbsp;DEX DB&nbsp;&nbsp;[![Coverage](https://coveralls.io/repos/github/calp-pro/dex_db/badge.svg?branch=main)](https://coveralls.io/github/calp-pro/dex_db)
 
 Database for decentralize exchangers.<br>
-Low level data base based on [Radix-tree](https://en.wikipedia.org/wiki/Radix_tree) (same way as SQL).<br>
-Each address (pair or token) presented as an integer number after indexing.<br>
+Each pair & token address indexed to a number.<br>
 Then [factory](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Factory.sol) information can be presented as:
-[[token0, token1], ...]<br>
+[[token0_index, token1_index], ...]<br>
 Example:<br>
-`[[0, 4], [0, 1], [5, 3], ...]`<br>
+`[0, 4, 0, 1, 5, 3, ...]`<br>
 where:<br>
-- `[0, 4]`
-  * is first element at array at index `0` (pair index `0`)
+- `0, 4`
+  * is first and second element at array at index `0`, `1` (pair index `0`)
   * `0` index of `token0` of pair 0
   * `4` index of `token1` of pair 0
-- `[0, 1]`
-  * is second element at array at index `1` (pair index `1`)
+- `0, 1`
+  * is next pair of token at positions `2`, `3` (pair index `1`)
   * `0` index of `token0` of pair 1 (same token can be at different pairs)
-  * `1` index of `token1` of pair 1
-- `[5, 3]`
-  * is third element at array at index `2` (pair index `2`)
-  * `5` index of `token0` of pair 2
-  * `4` index of `token1` of pair 2
+  * `1` index of `token1` of pair `1`
+- `5, 3`
+  * is next pair of tokens at positions `4`, `5` (pair index `2`)
+  * `5` index of `token0` of pair `2`
+  * `3` index of `token1` of pair `2`
 
 ## Install
 ```bash
@@ -47,3 +46,10 @@ const pairs = dex_db.find_pairs_with_token('0xa0b86991c6218b36c1d19d4a2e9eb0ce36
 //pairs[1] == '0x07f068ca326a469fc1d87d85d448990c8cba7df9'/*REN/USDC*/)
 //pairs[2] == '0xae461ca67b15dc8dc81ce7615e0320da1a9ab8d5'/*DAI/USDC*/)
 ```
+
+## API
+- `find_pairs_with_token`
+- `find_pairs_with_tokens`
+- `index`
+- `save`
+- `load`
