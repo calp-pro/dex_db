@@ -28,6 +28,8 @@ function dex_db(pairs = []) {
         if (ip == undefined) {
             P.set(pair, ip = P.size)
             aP.push(pair)
+        } else {
+            return undefined
         }
 
         var it0 = T.get(token0)
@@ -56,6 +58,61 @@ function dex_db(pairs = []) {
             t2pt[it1] = [ip, it0]
     }
 
+    const index_save = ([pair, token0, token1], filename = 'dump') => {
+        if (pair.length != 42 || token0.length != 42 || token1.length != 42) return
+        var ip = P.get(pair)
+        if (ip == undefined) {
+            P.set(pair, ip = P.size)
+            aP.push(pair)
+            fs.appendFileSync(filename + '_pairs.bin', Buffer.from(pair.slice(2), 'hex'))
+        } else {
+            return undefined
+        }
+
+        var it0 = T.get(token0)
+        if (it0 == undefined) {
+            T.set(token0, it0 = T.size)
+            aT.push(token0)
+            fs.appendFileSync(filename + '_tokens.bin', Buffer.from(token0.slice(2), 'hex'))
+        }
+
+        var it1 = T.get(token1)
+        if (it1 == undefined) {
+            T.set(token1, it1 = T.size)
+            aT.push(token1)
+            fs.appendFileSync(filename + '_tokens.bin', Buffer.from(token1.slice(2), 'hex'))
+        }
+
+        p2tt[ip * 2] = it0
+        p2tt[ip * 2 + 1] = it1
+
+        const buf = Buffer.allocUnsafe(6)
+        writeUInt24LE(buf, it0, 0)
+        writeUInt24LE(buf, it1, 3)
+        fs.appendFileSync(filename + '_p2tt.bin', buf)        
+        
+        if (t2pt[it0])
+            t2pt[it0].push(ip, it1)
+        else
+            t2pt[it0] = [ip, it1]
+            
+        if (t2pt[it1])
+            t2pt[it1].push(ip, it0)
+        else
+            t2pt[it1] = [ip, it0]
+
+        return [ip, it0, it1]
+    }
+
+    const get_tokens = pair => {
+        const tokens = Array(2)
+        const ip = P.get(pair)
+        if (ip == undefined) return tokens
+        tokens[0] = aT[p2tt[ip * 2]]
+        tokens[1] = aT[p2tt[ip * 2 + 1]]
+        return tokens
+    }
+
     const find_pairs_with_token = token => {
         const pairs = []
         const it = T.get(token)
@@ -82,8 +139,8 @@ function dex_db(pairs = []) {
     }
     
     const save = (filename = 'dump') => {
-        fs.writeFileSync(filename + '_pairs.json', JSON.stringify(aP.map(a => a.slice(2))))
-        fs.writeFileSync(filename + '_tokens.json', JSON.stringify(aT.map(a => a.slice(2))))
+        fs.writeFileSync(filename + '_pairs.bin', Buffer.concat(aP.map(a => Buffer.from(a.slice(2), 'hex'))))
+        fs.writeFileSync(filename + '_tokens.bin', Buffer.concat(aT.map(a => Buffer.from(a.slice(2), 'hex'))))
         const bin = fs.openSync(filename + '_p2tt.bin', 'w')
         const buf = Buffer.allocUnsafe(6)
         for (var i = 0; i < p2tt.length; i += 2) {
@@ -101,14 +158,23 @@ function dex_db(pairs = []) {
         t2pt.length = 0
         T = new Map()
         P = new Map()
-        aP = JSON.parse(fs.readFileSync(filename + '_pairs.json', 'utf8')).map(a => '0x' + a)
-        aT = JSON.parse(fs.readFileSync(filename + '_tokens.json', 'utf8')).map(a => '0x' + a)
-        aP.forEach((p, i) => P.set(p, i))
-        aT.forEach((t, i) => T.set(t, i))
+
+        var buf = fs.readFileSync(filename + '_pairs.bin')
+        for (var i = 0; i < buf.length; i += 20) {
+            const pair = '0x' + buf.slice(i, i + 20).toString('hex')
+            aP.push(pair)
+            P.set(pair, i / 20)
+        }
+        buf = fs.readFileSync(filename + '_tokens.bin')
+        for (var i = 0; i < buf.length; i += 20) {
+            const token = '0x' + buf.slice(i, i + 20).toString('hex')
+            aT.push(token)
+            T.set(token, i / 20)
+        }
 
         const bin = fs.openSync(filename + '_p2tt.bin', 'r')
         const { size } = fs.fstatSync(bin)
-        const buf = Buffer.allocUnsafe(6)
+        buf = Buffer.allocUnsafe(6)
         
         for (var offset = 0, ip, it0, it1; offset < size; offset += 6) {
             fs.readSync(bin, buf, 0, 6, offset)
@@ -136,10 +202,14 @@ function dex_db(pairs = []) {
     
     return {
         index,
+        index_save,
         find_pairs_with_token,
         find_pairs_with_tokens,
         save,
-        load
+        load,
+        get_tokens,
+        get_all_pairs: () => aP,
+        get_all_tokens: () => aT,
     }
 }
 

@@ -26,7 +26,6 @@ describe('DEX DB', () => {
     )
 
     it('Find arbitrage pairs addresses between WBTC/WETH tokens at PancakeSwap and SushiSwap', () => {
-        debugger
         const pairs = db.find_pairs_with_tokens(
             '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'/*WBTC*/,
             '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
@@ -65,6 +64,12 @@ describe('DEX DB', () => {
             '0x_some_address_which_have_not_loaded'
         )
         assert.equal(pairs.length, 0)
+    })
+    
+    it('Get tokens of pairs WBTC/WETH', () => {
+        const [token0, token1] = db.get_tokens('0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
+        assert.equal(token0, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', 'WBTC check at pair: https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
+        assert.equal(token1, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 'WETH check at pair https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
     })
 })
 

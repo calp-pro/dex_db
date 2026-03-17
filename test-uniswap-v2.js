@@ -7,6 +7,8 @@ const dex_db = require('./dex_db')
 describe('Uniswap v2', () => {
     var db1
     var db2
+    var db3
+    var db4
 
     before(() =>
         uniswap_v2_dump.load({workers: 0})
@@ -46,11 +48,45 @@ describe('Uniswap v2', () => {
         )
         assert.deepEqual(pairs1, pairs2)
     })
+
+    it('Save one by one using "index_save"', () => {
+        db3 = dex_db()
+    })
+
+    it('Get all pairs with BAT at Uniswap v2 (resaved using "index_save")', () => {
+        db1.get_all_pairs().forEach(pair => {
+            const [token0, token1] = db1.get_tokens(pair)
+            db3.index_save([pair, token0, token1], 'one_by_one')
+        })
+
+        const pairs1 = db1.find_pairs_with_token(
+            '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
+        )
+        const pairs3 = db3.find_pairs_with_token(
+            '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
+        )
+        assert.deepEqual(pairs1, pairs3)
+    })
+    
+    it('Load', () => {
+        db4 = dex_db()
+        db4.load('one_by_one')
+        const pairs1 = db1.find_pairs_with_token(
+            '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
+        )
+        const pairs4 = db4.find_pairs_with_token(
+            '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
+        )
+        assert.deepEqual(pairs1, pairs4)
+    })
     
     after(() => {
         fs.unlinkSync('dump_p2tt.bin')
-        fs.unlinkSync('dump_pairs.json')
-        fs.unlinkSync('dump_tokens.json')
+        fs.unlinkSync('dump_pairs.bin')
+        fs.unlinkSync('dump_tokens.bin')
+        fs.unlinkSync('one_by_one_p2tt.bin')
+        fs.unlinkSync('one_by_one_pairs.bin')
+        fs.unlinkSync('one_by_one_tokens.bin')
     })
 
 })
