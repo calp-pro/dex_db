@@ -29,7 +29,7 @@ function dex_db(pairs = []) {
             P.set(pair, ip = P.size)
             aP.push(pair)
         } else {
-            return undefined
+            return [ip, T.get(token0), T.get(token1)]
         }
 
         var it0 = T.get(token0)
@@ -56,6 +56,8 @@ function dex_db(pairs = []) {
             t2pt[it1].push(ip, it0)
         else
             t2pt[it1] = [ip, it0]
+
+        return [ip, it0, it1]
     }
 
     const index_save = ([pair, token0, token1], filename = 'dump') => {
@@ -66,7 +68,7 @@ function dex_db(pairs = []) {
             aP.push(pair)
             fs.appendFileSync(filename + '_pairs.bin', Buffer.from(pair.slice(2), 'hex'))
         } else {
-            return undefined
+            return [ip, T.get(token0), T.get(token1)]
         }
 
         var it0 = T.get(token0)

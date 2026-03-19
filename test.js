@@ -71,6 +71,23 @@ describe('DEX DB', () => {
         assert.equal(token0, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', 'WBTC check at pair: https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
         assert.equal(token1, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 'WETH check at pair https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
     })
+
+    it('Try index already indexed pair WBTC/WETH (client have duplicates)', () => {
+        const [ip, it0, it1] = db.index([
+            '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8',/*WBTC/WETH*/
+            '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',/*WBTC*/
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
+        ])
+        assert.equal(ip, 2, 'Index of pair WBTC/WETH is fixed')
+        assert.equal(it0, 3, 'Index of token0(WBTC) is fixed')
+        assert.equal(it1, 1, 'Index of token1(WETH) is fixed')
+        const indexes = db.index_save([
+            '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8',/*WBTC/WETH*/
+            '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',/*WBTC*/
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
+        ])
+        assert.deepEqual([ip, it0, it1], indexes, '"index" and "index_save" should return same indexes')
+    })
 })
 
 
