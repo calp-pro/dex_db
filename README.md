@@ -50,6 +50,8 @@ const pairs = dex_db.find_pairs_with_token('0xa0b86991c6218b36c1d19d4a2e9eb0ce36
 ## API
 - `find_pairs_with_token`
 - `find_pairs_with_tokens`
+- `get_pair_tokens`
 - `index`
+- `index_save`
 - `save`
 - `load`

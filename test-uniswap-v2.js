@@ -49,13 +49,10 @@ describe('Uniswap v2', () => {
         assert.deepEqual(pairs1, pairs2)
     })
 
-    it('Save one by one using "index_save"', () => {
-        db3 = dex_db()
-    })
-
     it('Get all pairs with BAT at Uniswap v2 (resaved using "index_save")', () => {
+        db3 = dex_db()
         db1.get_all_pairs().forEach(pair => {
-            const [token0, token1] = db1.get_tokens(pair)
+            const [token0, token1] = db1.get_pair_tokens(pair)
             db3.index_save([pair, token0, token1], 'one_by_one')
         })
 

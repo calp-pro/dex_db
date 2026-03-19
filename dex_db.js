@@ -1,4 +1,4 @@
-// DexDB
+// DexDB v2.0.1
 // written 13 March 2026 by Vladimir Spirin at Danang, Vietnam
 const fs = require('fs')
 
@@ -104,7 +104,7 @@ function dex_db(pairs = []) {
         return [ip, it0, it1]
     }
 
-    const get_tokens = pair => {
+    const get_pair_tokens = pair => {
         const tokens = Array(2)
         const ip = P.get(pair)
         if (ip == undefined) return tokens
@@ -207,7 +207,7 @@ function dex_db(pairs = []) {
         find_pairs_with_tokens,
         save,
         load,
-        get_tokens,
+        get_pair_tokens,
         get_all_pairs: () => aP,
         get_all_tokens: () => aT,
     }
