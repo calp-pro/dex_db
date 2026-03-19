@@ -1,6 +1,6 @@
 {
   "name": "@calp-pro/dex-db",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Database designed for handle relation pair/pool address to token0 & token1 addresses",
   "keywords": [
     "DEX",
