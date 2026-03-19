@@ -66,10 +66,18 @@ describe('DEX DB', () => {
         assert.equal(pairs.length, 0)
     })
     
-    it('Get tokens of pairs WBTC/WETH', () => {
-        const [token0, token1] = db.get_pair_tokens('0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
-        assert.equal(token0, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', 'WBTC check at pair: https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
-        assert.equal(token1, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 'WETH check at pair https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
+    describe('get_pair_tokens', () => {
+        it('Get tokens of pairs WBTC/WETH', () => {
+            const [token0, token1] = db.get_pair_tokens('0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
+            assert.equal(token0, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', 'WBTC check at pair: https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
+            assert.equal(token1, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 'WETH check at pair https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
+        })
+
+        it('Not existed pair', () => {
+            const tokens = db.get_pair_tokens('0x_not_found')
+            assert.equal(tokens[0], undefined, 'Indexes of token0 is undefined because pair has not indexed')
+            assert.equal(tokens[1], undefined, 'Indexes of token1 is undefined because pair has not indexed')
+        })
     })
 
     it('Try index already indexed pair WBTC/WETH (client have duplicates)', () => {
@@ -87,6 +95,33 @@ describe('DEX DB', () => {
             '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
         ])
         assert.deepEqual([ip, it0, it1], indexes, '"index" and "index_save" should return same indexes')
+    })
+
+    it('index_save save binary with exact address size 42 - have to validate address', () => {
+        assert.equal(
+            db.index_save([
+                '0x_not_42',
+                '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',/*WBTC*/
+                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
+            ]),
+            undefined
+        )
+        assert.equal(
+            db.index_save([
+                '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8',/*WBTC/WETH*/
+                '0x_not_42',
+                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
+            ]),
+            undefined
+        )
+        assert.equal(
+            db.index_save([
+                '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8',/*WBTC/WETH*/
+                '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',/*WBTC*/
+                '0x_not_42'
+            ]),
+            undefined
+        )
     })
 })
 

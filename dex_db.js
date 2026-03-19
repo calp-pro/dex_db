@@ -1,4 +1,4 @@
-// DexDB v2.0.1
+// DexDB v2.0.3
 // written 13 March 2026 by Vladimir Spirin at Danang, Vietnam
 const fs = require('fs')
 
