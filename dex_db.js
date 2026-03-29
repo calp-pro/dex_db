@@ -105,6 +105,26 @@ function dex_db(pairs = []) {
 
         return [ip, it0, it1]
     }
+    
+    const remove_pair = pair => {
+        const ip = P.get(pair)
+        P.delete(pair)
+        aP.splice(ip, 1)
+        for (var i = 0, it; i <= 1; i++) {
+            it = p2tt[ip * 2 + i]
+            for (var j = 0; j < t2pt[it].length; j += 2) {
+                if (t2pt[it][j] == ip) {
+                    t2pt[it].splice(j, 2)
+                    if (t2pt[it].length == 0) {
+                        T.delete(aT[it])
+                        aT.splice(it, 1)
+                        t2pt.splice(it, 1)
+                    }
+                    break
+                }
+            }
+        }
+    }
 
     const get_pair_tokens = pair => {
         const tokens = Array(2)
@@ -199,12 +219,19 @@ function dex_db(pairs = []) {
 
         fs.closeSync(bin)
     }
+
+    const remove_pair_save = (pair, filename) => {
+        remove_pair(pair)
+        save(filename)
+    }
     
     pairs.forEach(index)
     
     return {
         index,
         index_save,
+        remove_pair,
+        remove_pair_save,
         find_pairs_with_token,
         find_pairs_with_tokens,
         save,

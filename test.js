@@ -1,8 +1,9 @@
-const { describe, before, it } = require('node:test')
+const { describe, before, it, after } = require('node:test')
 const assert = require('node:assert/strict')
 const pancakeswap_dump = require('pancakeswap-dump')
 const sushiswap_dump = require('sushiswap-dump')
 const dex_db = require('./dex_db')
+const fs = require('fs')
 
 describe('DEX DB', () => {
     var db
@@ -38,9 +39,20 @@ describe('DEX DB', () => {
         const pairs = db.find_pairs_with_token(
             '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
         )
+        var tokens
+
         assert.equal(pairs[0], '0xaf4b3145ca0cadbd9454f5815ef5d221f828507e', 'BAT/4TH (Pancake) https://etherscan.io/address/0xaf4b3145ca0cadbd9454f5815ef5d221f828507e')
+        tokens = db.get_pair_tokens('0xaf4b3145ca0cadbd9454f5815ef5d221f828507e')
+        assert.ok(tokens.includes('0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/))
+        
         assert.equal(pairs[1], '0x998bf04788c1c631c0e02bd1eed3d945308bf0a3', 'BAT/WETH (Sushi) https://etherscan.io/address/0x998bf04788c1c631c0e02bd1eed3d945308bf0a3')
+        tokens = db.get_pair_tokens('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3')
+        assert.ok(tokens.includes('0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/))
+
         assert.equal(pairs[2], '0x343036d87c813879b24076bb932187a845ea0989', 'BAT/MATIC (Sushi) https://etherscan.io/address/0x343036d87c813879b24076bb932187a845ea0989')
+        tokens = db.get_pair_tokens('0x343036d87c813879b24076bb932187a845ea0989')
+        assert.ok(tokens.includes('0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/))
+
     })
 
     it('If address of token not indexed at DB then -1 (find_pairs_with_token)', () => {
@@ -122,6 +134,60 @@ describe('DEX DB', () => {
             ]),
             undefined
         )
+    })
+
+    it('BAT/WETH (Sushi) should have BAT token', () => {
+        const tokens = db.get_pair_tokens('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3'/*BAT/WETH*/)
+        assert.ok(tokens.includes('0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/))
+    })
+    
+    describe('remove_pair', () => {
+        it('Remove all pairs for WBTC token', () => {
+            var pairs, tokens
+            pairs = db.find_pairs_with_token('0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'/*WBTC*/)
+            assert.ok(pairs.length > 0, 'WBTC should have a lot of pairs for remove')
+            pairs.forEach(pair => {
+                tokens = db.get_pair_tokens(pair)
+                assert.ok(tokens.includes('0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'/*WBTC*/))                
+                db.remove_pair(pair)
+                tokens = db.get_pair_tokens(pair)
+                assert.equal(tokens[0], undefined, 'token0 should be undefined because pair removed')
+                assert.equal(tokens[1], undefined, 'token1 should be undefined because pair removed')
+            })
+            pairs = db.find_pairs_with_token('0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'/*WBTC*/)
+            assert.equal(pairs.length, 0, 'WBTC should not have any pair after remove all')
+        })
+        
+        
+        it('BAT/WETH (Sushi) should have BAT token (after remove)', () => {
+            const tokens = db.get_pair_tokens('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3'/*BAT/WETH*/)
+            assert.ok(tokens.includes('0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/))
+        })
+
+        it('remove_pair_save', () => {
+            debugger
+            var tokens
+            tokens = db.get_pair_tokens('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3'/*BAT/WETH*/)
+            assert.ok(tokens.includes('0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/))
+            db.remove_pair_save('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3'/*BAT/WETH*/, 'without_bat_weth')
+            tokens = db.get_pair_tokens('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3'/*BAT/WETH*/)
+            assert.equal(tokens[0], undefined, 'token0 should be undefined because pair removed')
+            assert.equal(tokens[1], undefined, 'token1 should be undefined because pair removed')
+            assert.equal(fs.existsSync('without_bat_weth_p2tt.bin'), true)
+            assert.equal(fs.existsSync('without_bat_weth_pairs.bin'), true)
+            assert.equal(fs.existsSync('without_bat_weth_tokens.bin'), true)
+            const db_without_bat_weth = dex_db()
+            db_without_bat_weth.load('without_bat_weth')
+            tokens = db_without_bat_weth.get_pair_tokens('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3'/*BAT/WETH*/)
+            assert.equal(tokens[0], undefined, 'token0 should be undefined because pair removed')
+            assert.equal(tokens[1], undefined, 'token1 should be undefined because pair removed')
+        })
+        
+        after(() => {
+            fs.unlinkSync('without_bat_weth_p2tt.bin')
+            fs.unlinkSync('without_bat_weth_pairs.bin')
+            fs.unlinkSync('without_bat_weth_tokens.bin')
+        })
     })
 })
 
