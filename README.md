@@ -3,13 +3,14 @@
 Database for decentralize exchangers.<br>
 Each pair & token address indexed to a number.<br>
 Then [factory](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Factory.sol) information can be presented as:
-- *0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc* - have index N
-- *0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48* - have index X
-- *0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2* - have index Y
+- `0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc` - have index **N**
+- `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` - have index **X**
+- `0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2` - have index **Y**
 ```
-db[N    ] = X
-db[N + 1] = Y
+data_structure[N    ] = X
+data_structure[N + 1] = Y
 ```
+where **N**, **X**, **Y** are `uint24`.
 
 Example:<br>
 `[0, 4, 0, 1, 5, 3, ...]`<br>
