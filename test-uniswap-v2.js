@@ -9,6 +9,7 @@ describe('Uniswap v2', () => {
     var db2
     var db3
     var db4
+    var db5
 
     before(() =>
         uniswap_v2_dump.load({workers: 0})
@@ -77,6 +78,22 @@ describe('Uniswap v2', () => {
         assert.deepEqual(pairs1, pairs4)
     })
     
+    it('save_compressed', () => {
+        db4.save_compressed('sorted')
+        db5 = dex_db()
+        db5.load('sorted')
+        const pairs1 = db1.find_pairs_with_token(
+            '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
+        )
+        const pairs5 = db5.find_pairs_with_token(
+            '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
+        )
+        assert.deepEqual(
+            [...pairs1].sort(),
+            [...pairs5].sort()
+        )
+    })
+
     after(() => {
         fs.unlinkSync('dump_p2tt.bin')
         fs.unlinkSync('dump_pairs.bin')
@@ -84,6 +101,9 @@ describe('Uniswap v2', () => {
         fs.unlinkSync('one_by_one_p2tt.bin')
         fs.unlinkSync('one_by_one_pairs.bin')
         fs.unlinkSync('one_by_one_tokens.bin')
+        fs.unlinkSync('sorted_p2tt.bin')
+        fs.unlinkSync('sorted_pairs.bin')
+        fs.unlinkSync('sorted_tokens.bin')
     })
 
 })
