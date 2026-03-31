@@ -153,6 +153,61 @@ function dex_db(pairs = []) {
         fs.closeSync(bin)
     }
 
+    const sort = (fT, fP) => {
+        fT ??= (a, b) =>
+            t2pt[T.get(a)].length - t2pt[T.get(b)].length
+        fP ??= (a, b) => {
+            const ipA = P.get(a)
+            const ipB = P.get(b)
+            const it0A = p2tt[2 * ipA]
+            const it1A = p2tt[2 * ipA + 1]
+            const it0B = p2tt[2 * ipB]
+            const it1B = p2tt[2 * ipB + 1]
+            const connectionsA = t2pt[it0A].length + t2pt[it1A].length
+            const connectionsB = t2pt[it0B].length + t2pt[it1B].length
+            return connectionsA - connectionsB
+        }
+        const aTS = [...aT].sort(fT)
+        const aPS = [...aP].sort(fP)
+
+        const TS = new Map();
+        for (let i = 0; i < aTS.length; i++) TS.set(aTS[i], i)
+
+        const PS = new Map();
+        for (let i = 0; i < aPS.length; i++) PS.set(aPS[i], i)
+        
+        const p2ttS = []
+        const t2ptS = []
+
+        for (var ipS = 0; ipS < aPS.length; ipS++) {
+            var p = aPS[ipS]
+            var ip = P.get(p)
+            var it0 = p2tt[ip * 2]
+            var it1 = p2tt[ip * 2 + 1]
+            var t0 = aT[it0]
+            var t1 = aT[it1]
+            var it0S = TS.get(t0)
+            var it1S = TS.get(t1)
+            p2ttS[ipS * 2] = it0S
+            p2ttS[ipS * 2 + 1] = it1S
+            
+            if (t2ptS[it0S])
+                t2ptS[it0S].push(ipS, it1S)
+            else
+                t2ptS[it0S] = [ipS, it1S]
+                
+            if (t2ptS[it1S])
+                t2ptS[it1S].push(ipS, it0S)
+            else
+                t2ptS[it1S] = [ipS, it0S]
+        }
+
+        aP = aPS
+        aT = aTS
+        p2tt = p2ttS
+        t2pt = t2ptS
+    }
+
     const load = (filename = 'dump') => {
         aP.length = 0
         aT.length = 0
@@ -199,9 +254,9 @@ function dex_db(pairs = []) {
 
         fs.closeSync(bin)
     }
-    
+
     pairs.forEach(index)
-    
+
     return {
         index,
         index_save,
@@ -209,6 +264,7 @@ function dex_db(pairs = []) {
         find_pairs_with_tokens,
         save,
         load,
+        sort,
         get_pair_tokens,
         get_all_pairs: () => aP,
         get_all_tokens: () => aT,

@@ -63,3 +63,14 @@ const pairs = dex_db.find_pairs_with_token('0xa0b86991c6218b36c1d19d4a2e9eb0ce36
 - `index_save`
 - `save`
 - `load`
+- `sort`
+
+### `sort`
+Compression of deltas five only 10% which is not much for 10mb of tokens/pools addresses.
+Delivery to web 9mb or 10mb is same long waiting time which is user will wait.
+Loading should happen in background and each loaded chunk should be processed.
+Then very important is order of data which came first. Sorting of data helps to present fast most important data and less important left for later.
+
+By default token sorting is done by amount of pairs token have. WETH is top paired token - should appear first at sorted result.
+By default pair sorting is done by total pairs token0/1 have.
+
