@@ -78,8 +78,9 @@ describe('Uniswap v2', () => {
         assert.deepEqual(pairs1, pairs4)
     })
     
-    it('save_compressed', () => {
-        db4.save_compressed('sorted')
+    it('save/load sorted', () => {
+        db4.sort()
+        db4.save('sorted')
         db5 = dex_db()
         db5.load('sorted')
         const pairs1 = db1.find_pairs_with_token(

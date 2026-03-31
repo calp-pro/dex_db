@@ -153,9 +153,22 @@ function dex_db(pairs = []) {
         fs.closeSync(bin)
     }
 
-    const save_compressed = (filename = 'dump') => {
-        const aTS = [...aT].sort()
-        const aPS = [...aP].sort()
+    const sort = (fT, fP) => {
+        fT ??= (a, b) =>
+            t2pt[T.get(a)].length - t2pt[T.get(b)].length
+        fP ??= (a, b) => {
+            const ipA = P.get(a)
+            const ipB = P.get(b)
+            const it0A = p2tt[2 * ipA]
+            const it1A = p2tt[2 * ipA + 1]
+            const it0B = p2tt[2 * ipB]
+            const it1B = p2tt[2 * ipB + 1]
+            const connectionsA = t2pt[it0A].length + t2pt[it1A].length
+            const connectionsB = t2pt[it0B].length + t2pt[it1B].length
+            return connectionsA - connectionsB
+        }
+        const aTS = [...aT].sort(fT)
+        const aPS = [...aP].sort(fP)
 
         const TS = new Map();
         for (let i = 0; i < aTS.length; i++) TS.set(aTS[i], i)
@@ -164,7 +177,8 @@ function dex_db(pairs = []) {
         for (let i = 0; i < aPS.length; i++) PS.set(aPS[i], i)
         
         const p2ttS = []
-        
+        const t2ptS = []
+
         for (var ipS = 0; ipS < aPS.length; ipS++) {
             var p = aPS[ipS]
             var ip = P.get(p)
@@ -176,17 +190,22 @@ function dex_db(pairs = []) {
             var it1S = TS.get(t1)
             p2ttS[ipS * 2] = it0S
             p2ttS[ipS * 2 + 1] = it1S
+            
+            if (t2ptS[it0S])
+                t2ptS[it0S].push(ipS, it1S)
+            else
+                t2ptS[it0S] = [ipS, it1S]
+                
+            if (t2ptS[it1S])
+                t2ptS[it1S].push(ipS, it0S)
+            else
+                t2ptS[it1S] = [ipS, it0S]
         }
-        fs.writeFileSync(filename + '_pairs.bin', Buffer.concat(aPS.map(a => Buffer.from(a.slice(2), 'hex'))))
-        fs.writeFileSync(filename + '_tokens.bin', Buffer.concat(aTS.map(a => Buffer.from(a.slice(2), 'hex'))))
-        const bin = fs.openSync(filename + '_p2tt.bin', 'w')
-        const buf = Buffer.allocUnsafe(6)
-        for (var i = 0; i < p2ttS.length; i += 2) {
-            writeUInt24LE(buf, p2ttS[i], 0)
-            writeUInt24LE(buf, p2ttS[i + 1], 3)
-            fs.writeSync(bin, buf)
-        }
-        fs.closeSync(bin)
+
+        aP = aPS
+        aT = aTS
+        p2tt = p2ttS
+        t2pt = t2ptS
     }
 
     const load = (filename = 'dump') => {
@@ -244,8 +263,8 @@ function dex_db(pairs = []) {
         find_pairs_with_token,
         find_pairs_with_tokens,
         save,
-        save_compressed,
         load,
+        sort,
         get_pair_tokens,
         get_all_pairs: () => aP,
         get_all_tokens: () => aT,
