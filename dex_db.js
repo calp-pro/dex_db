@@ -155,7 +155,7 @@ function dex_db(pairs = []) {
 
     const sort = (fT, fP) => {
         fT ??= (a, b) =>
-            t2pt[T.get(a)].length - t2pt[T.get(b)].length
+            t2pt[T.get(b)].length - t2pt[T.get(a)].length
         fP ??= (a, b) => {
             const ipA = P.get(a)
             const ipB = P.get(b)
@@ -165,7 +165,7 @@ function dex_db(pairs = []) {
             const it1B = p2tt[2 * ipB + 1]
             const connectionsA = t2pt[it0A].length + t2pt[it1A].length
             const connectionsB = t2pt[it0B].length + t2pt[it1B].length
-            return connectionsA - connectionsB
+            return connectionsB - connectionsA
         }
         const aTS = [...aT].sort(fT)
         const aPS = [...aP].sort(fP)
