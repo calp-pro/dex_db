@@ -23,7 +23,7 @@ function dex_db(pairs = []) {
     var p2tt = []// [p1.it0, p1.it1, p2.it0, p2, it1, ...]
     var t2pt = []// [ [[ip, it], [ip, it], ...], ...]
 
-    const index = ([pair, token0, token1]) => {
+    const index = (pair, token0, token1) => {
         var ip = P.get(pair)
         if (ip == undefined) {
             P.set(pair, ip = P.size)
@@ -60,7 +60,7 @@ function dex_db(pairs = []) {
         return [ip, it0, it1]
     }
 
-    const index_save = ([pair, token0, token1], filename = 'dump') => {
+    const index_save = (pair, token0, token1, filename = 'dump') => {
         if (pair.length != 42 || token0.length != 42 || token1.length != 42) return
         var ip = P.get(pair)
         if (ip == undefined) {
@@ -255,7 +255,7 @@ function dex_db(pairs = []) {
         fs.closeSync(bin)
     }
 
-    pairs.forEach(index)
+    pairs.forEach(_ => index(..._))
 
     return {
         index,

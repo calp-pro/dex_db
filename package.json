@@ -1,6 +1,6 @@
 {
   "name": "@calp-pro/dex-db",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Database designed for handle relation pair/pool address to token0 & token1 addresses",
   "keywords": [
     "DEX",
@@ -32,9 +32,9 @@
     "test": "node --test test*js"
   },
   "devDependencies": {
-    "pancakeswap-dump": "^1.0.8",
-    "sushiswap-dump": "^1.0.3",
-    "uniswap-v2-dump": "^3.0.13"
+    "pancakeswap-dump": "1.0.*",
+    "sushiswap-dump": "1.0.*",
+    "uniswap-v2-dump": "3.0.*"
   },
   "publishConfig": {
     "provenance": true

@@ -1,8 +1,8 @@
 export type pair = [string, string, string]
 
 export interface dex_db_instance {
-  index: (pair: pair) => [number, number, number]
-  index_save: (pair: pair, filename?: string) => [number, number, number] | undefined
+  index: (pair: string, token_a: string, token_b: string) => [number, number, number]
+  index_save: (pair: string, token_a: string, token_b: string, filename?: string) => [number, number, number] | undefined
   find_pairs_with_token: (token: string) => string[]
   find_pairs_with_tokens: (token_a: string, token_b: string) => string[]
   save: (filename?: string) => void

@@ -54,7 +54,7 @@ describe('Uniswap v2', () => {
         db3 = dex_db()
         db1.get_all_pairs().forEach(pair => {
             const [token0, token1] = db1.get_pair_tokens(pair)
-            db3.index_save([pair, token0, token1], 'one_by_one')
+            db3.index_save(pair, token0, token1, 'one_by_one')
         })
 
         const pairs1 = db1.find_pairs_with_token(

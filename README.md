@@ -30,12 +30,12 @@ where:<br>
 
 ## Install
 ```bash
-npm i --save dex-db
+npm i --save @calp-pro/dex-db
 ```
 
 ## Use
 ```js
-import dex_db from 'dex-db'
+import dex_db from '@calp-pro/dex-db'
 
 const db = dex_db(
     [
