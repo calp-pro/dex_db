@@ -17,11 +17,11 @@ Example:<br>
 where:<br>
 - `0, 4`
   * is first and second element at array at index `0`, `1` (pair index `0`)
-  * `0` index of `token0` of pair 0
-  * `4` index of `token1` of pair 0
+  * `0` index of `token0` of pair `0`
+  * `4` index of `token1` of pair `0`
 - `0, 1`
   * is next pair of token at positions `2`, `3` (pair index `1`)
-  * `0` index of `token0` of pair 1 (same token can be at different pairs)
+  * `0` index of `token0` of pair `1` (same token can be at different pairs)
   * `1` index of `token1` of pair `1`
 - `5, 3`
   * is next pair of tokens at positions `4`, `5` (pair index `2`)
