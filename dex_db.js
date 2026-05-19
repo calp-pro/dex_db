@@ -128,6 +128,7 @@ function dex_db(pairs = []) {
 
     const find_pairs_with_tokens = (token0, token1) => {
         const pairs = []
+        if (token0 == token1) return pairs
         const it0 = T.get(token0)
         if (it0 == undefined) return pairs
         const it1 = T.get(token1)
@@ -266,8 +267,8 @@ function dex_db(pairs = []) {
         load,
         sort,
         get_pair_tokens,
-        get_all_pairs: () => aP,
-        get_all_tokens: () => aT,
+        get_all_pairs: () => [...aP],
+        get_all_tokens: () => [...aT],
     }
 }
 
