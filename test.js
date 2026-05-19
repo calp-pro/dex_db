@@ -5,20 +5,18 @@ const sushiswap_dump = require('sushiswap-dump')
 const dex_db = require('./dex_db')
 
 describe('DEX DB', () => {
-    var db
+    var db = dex_db()
 
     before(() =>
         Promise.all(
             [
                 pancakeswap_dump,
                 sushiswap_dump
-            ].map(_ => _.load({workers: 0}))
-        )
-        .then(all_pairs =>
-            db = dex_db(
-                all_pairs.flatMap(pairs =>
-                    pairs.map(({pair, token0, token1}) =>
-                        [pair, token0, token1]
+            ].map(dump =>
+                dump.load({workers: 0})
+                .then(pairs =>
+                    pairs.forEach(({pair, token0, token1}) =>
+                        db.index(pair, token0, token1)
                     )
                 )
             )
@@ -30,17 +28,39 @@ describe('DEX DB', () => {
             '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'/*WBTC*/,
             '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
         )
-        assert.equal(pairs[0], '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8', 'WBTC/WETH (Pancake) https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
-        assert.equal(pairs[1], '0xceff51756c56ceffca006cd410b03ffc46dd3a58', 'WBTC/WETH (Sushi) https://etherscan.io/address/0xceff51756c56ceffca006cd410b03ffc46dd3a58')
+        assert.ok(pairs.includes('0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8'), 'WBTC/WETH (Pancake) https://etherscan.io/address/0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8')
+        assert.ok(pairs.includes('0xceff51756c56ceffca006cd410b03ffc46dd3a58'), 'WBTC/WETH (Sushi) https://etherscan.io/address/0xceff51756c56ceffca006cd410b03ffc46dd3a58')
     })
 
+    it('Extract all tokens from pairs', () => {
+        const tokens = new Set()
+        db.get_all_pairs().forEach(pair =>
+            db.get_pair_tokens(pair).forEach(token =>
+                tokens.add(token)
+            )
+        )
+        assert.equal(tokens.size, db.get_all_tokens().length)
+    })
+    
+    it('Generate all pairs from all tokens', () => {
+        const tokens = db.get_all_tokens()
+        const pairs = new Set()
+        for (var it0 = 0; it0 < tokens.length; it0++)
+            for(var it1 = 0; it1 < tokens.length; it1++)
+                db.find_pairs_with_tokens(tokens[it0], tokens[it1]).forEach(pair =>
+                    pairs.add(pair)
+                )
+        assert.equal(pairs.size, db.get_all_pairs().length)
+    })
+
+    
     it('Get all pairs with BAT at PancakeSwap and SushiSwap', () => {
         const pairs = db.find_pairs_with_token(
             '0x0d8775f648430679a709e98d2b0cb6250d2887ef'/*BAT*/
         )
-        assert.equal(pairs[0], '0xaf4b3145ca0cadbd9454f5815ef5d221f828507e', 'BAT/4TH (Pancake) https://etherscan.io/address/0xaf4b3145ca0cadbd9454f5815ef5d221f828507e')
-        assert.equal(pairs[1], '0x998bf04788c1c631c0e02bd1eed3d945308bf0a3', 'BAT/WETH (Sushi) https://etherscan.io/address/0x998bf04788c1c631c0e02bd1eed3d945308bf0a3')
-        assert.equal(pairs[2], '0x343036d87c813879b24076bb932187a845ea0989', 'BAT/MATIC (Sushi) https://etherscan.io/address/0x343036d87c813879b24076bb932187a845ea0989')
+        assert.ok(pairs.includes('0xaf4b3145ca0cadbd9454f5815ef5d221f828507e'), 'BAT/4TH (Pancake) https://etherscan.io/address/0xaf4b3145ca0cadbd9454f5815ef5d221f828507e')
+        assert.ok(pairs.includes('0x998bf04788c1c631c0e02bd1eed3d945308bf0a3'), 'BAT/WETH (Sushi) https://etherscan.io/address/0x998bf04788c1c631c0e02bd1eed3d945308bf0a3')
+        assert.ok(pairs.includes('0x343036d87c813879b24076bb932187a845ea0989'), 'BAT/MATIC (Sushi) https://etherscan.io/address/0x343036d87c813879b24076bb932187a845ea0989')
     })
 
     it('If address of token not indexed at DB then -1 (find_pairs_with_token)', () => {
@@ -81,20 +101,25 @@ describe('DEX DB', () => {
     })
 
     it('Try index already indexed pair WBTC/WETH (client have duplicates)', () => {
-        const [ip, it0, it1] = db.index(
+        const first = db.index(
             '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8',/*WBTC/WETH*/
             '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',/*WBTC*/
             '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
         )
-        assert.equal(ip, 2, 'Index of pair WBTC/WETH is fixed')
-        assert.equal(it0, 3, 'Index of token0(WBTC) is fixed')
-        assert.equal(it1, 1, 'Index of token1(WETH) is fixed')
-        const indexes = db.index_save(
+        const second = db.index(
             '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8',/*WBTC/WETH*/
             '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',/*WBTC*/
             '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
         )
-        assert.deepEqual([ip, it0, it1], indexes, '"index" and "index_save" should return same indexes')
+        assert.equal(first[0], second[0], 'Index of pair WBTC/WETH is fixed')
+        assert.equal(first[1], second[1], 'Index of token0(WBTC) is fixed')
+        assert.equal(first[2], second[2], 'Index of token1(WETH) is fixed')
+        const third_via_save = db.index_save(
+            '0x4ab6702b3ed3877e9b1f203f90cbef13d663b0e8',/*WBTC/WETH*/
+            '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',/*WBTC*/
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'/*WETH*/
+        )
+        assert.deepEqual(first, third_via_save, '"index" and "index_save" should return same indexes')
     })
 
     it('index_save save binary with exact address size 42 - have to validate address', () => {
